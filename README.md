@@ -4,7 +4,7 @@ Group Assignment base repository for the Data Driven Security subject of the [Cy
 
 ## Project Title
 
-Brief description of the project.
+¿Podemos predecir una apk malicioso?
 
 ### Requirements
 
@@ -13,12 +13,12 @@ Brief description of the project.
   
   
 ### Project Description
-
-Description of the project. 
-
+ 
 ### Goals
 
 ### Data acquisition
+
+- APK's para analizar: https://iscxdownloads.cs.unb.ca/iscxdownloads/CICAndMal2017/APKs/
 
 ### Cleansing and transformations
 
