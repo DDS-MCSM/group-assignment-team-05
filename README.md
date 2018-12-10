@@ -14,7 +14,7 @@ Group Assignment base repository for the Data Driven Security subject of the [Cy
   
 ### Project Description
 
-Canadian Institute for Cybersecurity ha realizado un estudio sobre apps maliciosas. El estudio recoge los datos de 10.854 apps, de las cuales 4.354 han sido detectadas como malware y 6500 como benignas. El origen de las apps son de diferentes fuente de las cuales 6.000 son extraidas de la play store en los años 2015, 2016 y 2017. A partir de el analisis de las app's las han classificado en 4 categorias: Adware, Rasonmware, Scareware, SMS Malware. Hemos descargado las apk maliciosas que nos proporciona el estudio, las hemos analizados y hemos extraido los datos de cada app a un csv.
+Canadian Institute for Cybersecurity ha realizado un estudio sobre apps maliciosas. El estudio recoge los datos de 10.854 apps, de las cuales 4.354 han sido detectadas como malware y 6500 como benignas. El origen de las apps son de diferentes fuente de las cuales 6.000 son extraidas de la play store en los años 2015, 2016 y 2017. A partir de el analisis de las app's las han classificado en 4 categorias: Adware, Rasonmware, Scareware, SMS Malware. Hemos descargado las apk maliciosas y las hemos analizado con un script y exportado a un csv.
 
 ### Goals
 
