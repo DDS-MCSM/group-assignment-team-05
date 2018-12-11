@@ -18,6 +18,7 @@ Canadian Instituto for Cybersecurity ha realizado un estudio sobre apps malicios
 
 ### Goals
 
+- Modelo de prediccion con knn
 
 ### Data acquisition
 
