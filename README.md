@@ -23,6 +23,7 @@ Canadian Instituto for Cybersecurity ha realizado un estudio sobre apps malicios
 ### Data acquisition
 
 - APK's para analizar: https://iscxdownloads.cs.unb.ca/iscxdownloads/CICAndMal2017/APKs/
+- Datos de las APK: https://github.com/DDS-MCSM/group-assignment-team-05/blob/master/data.csv
 
 ### Cleansing and transformations
 
