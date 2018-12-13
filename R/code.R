@@ -1,7 +1,6 @@
 #' Lee y transforma los datos recopilados sobre las aplicacions de Android
 read_and_clean_apk_data <- function() {
-  apks <- utils::read.csv("data.csv", stringsAsFactors = F)
-  apks$type <- as.factor(apks$type)
+  apks <- utils::read.csv("data.csv")
 
   keep_cols <- c("type", "apk_size", "download_size", "n_features",
                  "n_files", "n_permissions", "n_dex", "n_references",
@@ -13,9 +12,15 @@ read_and_clean_apk_data <- function() {
                  "total_classes_size", "total_methods_size", "total_fields_size",
                  "max_depth")
   apks <- apks[keep_cols]
-  apks$malware = as.factor(with(apks, type != "BENIGN"))
 
   return(apks)
+}
+
+#' Modifica la columna 'type' del data_frame por una columna de 'malware'
+get_data_frame_with_malware <- function(data_frame) {
+  new_data_frame <- dplyr::rename(data_frame, malware = "type")
+  new_data_frame$malware <- with(new_data_frame, malware != "BENIGN")
+  return (new_data_frame)
 }
 
 #' Reorganiza los datos de un data frame aleatoriamente
@@ -39,8 +44,8 @@ split_data_frame <- function(df, split) {
   total_rows <- nrow(df)
   training_length <- floor(total_rows * split)
 
-  training_data <- df[1:training_length]
-  test_data <- df[training_length + 1:total_rows]
+  training_data <- df[1:training_length,]
+  test_data <- df[(training_length + 1):total_rows,]
 
   return (list(training_data, test_data))
 }
@@ -52,37 +57,86 @@ split_data_frame <- function(df, split) {
 #' @param training_percentage: Valor entre 0 y 1 correspondiente al porcentaje
 #' de registros a usar para los datos de entrenamiento
 #' @param k: El parametro del test KNN
-doKNN <- function(data_frame, training_percentage, k) {
+doKNN <- function(data_frame, training_percentage, ks) {
+  res <- split_data_frame(data_frame, training_percentage)
+  labels <- res[[1]][,1]
 
+  training_data <- as.data.frame(lapply(
+    res[[1]], normalize
+  ))[-1]
+  test_data <- as.data.frame(lapply(
+    res[[2]], normalize
+  ))[-1]
+
+  test_expected <- class::knn(train = training_data,
+                              test = test_data,
+                              cl = labels,
+                              k = ks)
+  test_actual <- as.factor(res[[2]]$malware)
+
+  return (list(test_expected, test_actual))
+}
+
+doSVM <- function(data_frame, training_percentage) {
+  res <- split_data_frame(data_frame, training_percentage)
+
+  training_data <- res[[1]][-1]
+  test_data <- res[[2]][-1]
+  labels <- res[[1]][,1]
+
+  model <- e1071::svm(x = training_data,
+                      y = labels,
+                      cost = 10,
+                      scale = FALSE)
+}
+
+#' Comprueba el nivel de acierto de nuestros tests
+check_results <- function(expected, actual) {
+  ok <- 0
+  for (i in 1:length(expected)) {
+    if (expected[i] == actual[i]) {
+      ok <- ok + 1
+    }
+  }
+
+  return (ok / length(expected))
+}
+
+#' Devuelve una tabla con los valores del parametro k y su porcentaje de
+#' acierto
+get_k_value_accuracy_table <- function(data_frame) {
+  accuracy_data_frame <- data.frame(0, 0)
+  names(accuracy_data_frame) <- c("k", "accuracy")
+
+  for (k in 1:20) {
+    res <- doKNN(data_frame, 0.65, k)
+    accuracy <- check_results(res[[1]], res[[2]])
+
+    accuracy_data_frame <- rbind(accuracy_data_frame, list(k, accuracy))
+  }
+
+  return (accuracy_data_frame)
+}
+
+
+#' Realiza tests KNN con diversos valores de k y devuelve una lista con el valor
+#' de k mas optimo y su porcentaje de acierto.
+get_best_k_value <- function(data_frame) {
+  best_k <- 1
+  best_accuracy <- 0
+
+  for (k in 1:20) {
+    res <- doKNN(data_frame, 0.65, k)
+    accuracy <- check_results(res[[1]], res[[2]])
+
+    if (accuracy > best_accuracy) {
+      best_accuracy <- accuracy
+      best_k <- k
+    }
+  }
+
+  return (list(best_k, best_accuracy))
 }
 
 
 
-# Limpia y prepara los datos para el test de KNN
-# Devuelve dos data frames de data y test respectivamente
-prepareKNNTestData <- function(df) {
-  df$malware = with(df, type != "BENIGN")
-  df <- df[-c(1,2,7,8,9,10,11,13,14,19,20,23,24,27,28,31,32)]
-
-  totalRows <- nrow(df)
-  totalCols <- ncol(df)
-  df <- df[c(totalCols, 1:totalCols - 1)]
-  df_n <- as.data.frame(lapply(df[2:totalCols], normalize))
-
-  print(head(df_n))
-
-  split <- floor(totalRows * 0.65)
-  trainingData <- df[1:split,]
-  testData <- df[split:totalRows,]
-
-  labels <- as.data.frame(trainingData)
-  labels <- as.data.frame(labels)[,1, drop = TRUE]
-
-  retValue <- list(as.data.frame(trainingData), as.data.frame(testData), labels)
-  return(retValue)
-}
-
-ret <- prepareKNNTestData(df)
-test_pred <- class::knn(train = as.data.frame(ret[1]), test = as.data.frame(ret[2]), cl = as.data.frame(ret[3])[,1, drop = TRUE], k = 10)
-test_actual <- as.data.frame(ret[2])$malware
-test_actual <- as.factor(test_actual)
