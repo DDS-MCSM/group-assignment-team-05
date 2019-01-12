@@ -80,14 +80,25 @@ doKNN <- function(data_frame, training_percentage, ks) {
 doSVM <- function(data_frame, training_percentage) {
   res <- split_data_frame(data_frame, training_percentage)
 
-  training_data <- res[[1]][-1]
-  test_data <- res[[2]][-1]
+  training_data <- as.data.frame(lapply(
+    res[[1]], normalize
+  ))[-1]
+  test_data <- as.data.frame(lapply(
+    res[[2]], normalize
+  ))[-1]
+
   labels <- res[[1]][,1]
 
   model <- e1071::svm(x = training_data,
                       y = labels,
                       cost = 10,
-                      scale = FALSE)
+                      scale = FALSE,
+                      type = "C-classification")
+
+  test_actual <- as.factor(res[[2]]$malware)
+  test_expected <- predict(model, test_data)
+  unname(test_expected)
+  return (list(test_expected, test_actual))
 }
 
 #' Comprueba el nivel de acierto de nuestros tests
@@ -137,6 +148,7 @@ get_best_k_value <- function(data_frame) {
 
   return (list(best_k, best_accuracy))
 }
+
 
 
 
