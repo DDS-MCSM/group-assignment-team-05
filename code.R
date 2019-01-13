@@ -149,6 +149,3 @@ get_best_k_value <- function(data_frame) {
   return (list(best_k, best_accuracy))
 }
 
-
-
-

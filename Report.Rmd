@@ -63,8 +63,9 @@ Primeramente, decidimos clasificar cada aplicación en función de si es o no ma
 Primeramente, eliminamos buena parte de las columnas relacionadas con el código, puesto que todas ellas mantienen entre sí una relación lineal bastante marcada. Por ejemplo, si representamos el número de métodos definidos `n_defined_methods` en función del numero de clases definidas `n_defined_classes`, obtenemos el siguiente gráfico:
 
 ```{r results='hide', echo=FALSE}
-ggplot2::ggplot(apks, ggplot2::aes(x=n_defined_classes, y=n_defined_methods, color = malware)) +
-  ggplot2::geom_point(fill = "white", alpha = 0.1)
+ggplot2::ggplot(apks, ggplot2::aes(x=n_defined_classes, y=n_defined_methods, color = factor(malware, labels = c("Benigna", "Malware")))) +
+  ggplot2::geom_point(fill = "white", alpha = 0.1) +
+  ggplot2::labs(color = "Tipo de aplicación", x = "Número de clases definidas", y = "Número de métodos definidos")
 ```
 
 Por lo tanto, decidimos descartar todas estas columnas salvo la de `n_defined_methods` a la hora de realizar el test de nuestros modelos.
@@ -72,15 +73,18 @@ Por lo tanto, decidimos descartar todas estas columnas salvo la de `n_defined_me
 Si observamos un histograma del tamáño de las aplicaciones, podemos observar claramente como la mayoría de las que son malware son principalmente aplicaciones de poco tamaño, de manera que esta también puede ser una buena variable a tener en cuenta a la hora de implementar los modelos:
 
 ```{r results='hide', echo=FALSE}
-ggplot2::ggplot(apks, ggplot2::aes(x=apk_size, color = malware)) +
-  ggplot2::geom_histogram(fill = "white", alpha = 0.5, binwidth = 300000)
+ggplot2::ggplot(apks, ggplot2::aes(x=apk_size, color = factor(malware, labels = c("Benigna", "Malware")))) +
+  ggplot2::geom_histogram(fill = "white", alpha = 0.5, binwidth = 300000)+
+    ggplot2::labs(color = "Tipo de aplicación", x = "Tamaño de la aplicación", y = "Número")
+
 ```
 
 Finalmente, observando el histograma de la columna `max_depth` (complejidad),
 
 ```{r results='hide', echo=FALSE}
-ggplot2::ggplot(apks, ggplot2::aes(x=max_depth, color = malware)) +
-  ggplot2::geom_histogram(fill = "white", alpha = 0.5, binwidth = 1)
+ggplot2::ggplot(apks, ggplot2::aes(x=max_depth, color = factor(malware, labels = c("Benigna", "Malware")))) +
+  ggplot2::geom_histogram(fill = "white", alpha = 0.5, binwidth = 1)+
+    ggplot2::labs(color = "Tipo de aplicación", x = "Complejidad", y = "Número")
 ```
 
 decidimos crear una nueva variable para nuestro modelo en función de si esta columna era menor o igual o mayor a 4, ya que vimos en nuestras pruebas que este valor era el que mejor resultado nos daba en los tests.
@@ -112,5 +116,6 @@ res <- doSVM(apks_knn, 0.65)
 print(check_results(res[[1]], res[[2]]))
 ```
 
+### Resultados
 
-### Results / Conclusions.
+Como hemos visto, hemos conseguido desarrollar un modelo estadísitico relativamente confiable, que nos permite detectar alplicaciones maliciosas solamente analizando su archivo apk.
